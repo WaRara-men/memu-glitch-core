@@ -13,9 +13,15 @@ function App() {
   const [mode, setMode] = useState<'retrieve' | 'memorize'>('retrieve');
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [memoryCount, setMemoryCount] = useState(0); // Track total memories
+  const [logs, setLogs] = useState<string[]>([]); // System logs
 
   // Calculate memory level (0, 1, 2)
   const memoryLevel = memoryCount < 3 ? 0 : memoryCount < 6 ? 1 : 2;
+
+  // Hack-style log generator
+  const addLog = (msg: string) => {
+    setLogs(prev => [`> ${msg}`, ...prev].slice(0, 8));
+  };
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,11 +31,32 @@ function App() {
     setIsGlitching(true);
     setMemories([]);
     setStatusMessage(null);
+    setLogs([]); // Clear previous logs
 
     // Sound Effect: Glitch Noise
     const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2570/2570-preview.mp3');
     audio.volume = 0.5;
     audio.play().catch(() => {}); // Ignore autoplay errors
+
+    // Fake Hacking Logs
+    const fakeLogs = [
+        "Connecting to neural network...",
+        "Bypassing firewalls...",
+        "Synapse firing sequence initiated...",
+        "Searching deep memory archives...",
+        "Decrypting memory fragments...",
+        "Access granted."
+    ];
+
+    let logIndex = 0;
+    const logInterval = setInterval(() => {
+        if (logIndex < fakeLogs.length) {
+            addLog(fakeLogs[logIndex]);
+            logIndex++;
+        } else {
+            clearInterval(logInterval);
+        }
+    }, 150);
 
     try {
       // Simulate "scanning" delay for visual effect
@@ -85,6 +112,13 @@ function App() {
       {/* UI Overlay */}
       <div className="absolute inset-0 z-10 flex flex-col items-center justify-between p-8 pointer-events-none">
         
+        {/* System Logs (Top Left) */}
+        <div className="absolute top-24 left-8 w-64 text-xs font-mono text-cyan-800 pointer-events-none">
+            {logs.map((log, i) => (
+                <div key={i} className="animate-fadeIn opacity-70">{log}</div>
+            ))}
+        </div>
+
         {/* Header */}
         <header className="w-full max-w-4xl flex justify-between items-center opacity-80">
             <div className="flex items-center gap-2">
