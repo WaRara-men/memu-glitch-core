@@ -12,7 +12,7 @@ function App() {
   const [isGlitching, setIsGlitching] = useState(false);
   const [mode, setMode] = useState<'retrieve' | 'memorize'>('retrieve');
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
-  const [memoryCount, setMemoryCount] = useState(0); // Track total memories
+  const [memoryCount, setMemoryCount] = useState(6); // Default to Chaos Mode (Level 3)
   const [logs, setLogs] = useState<string[]>([]); // System logs
 
   // Calculate memory level (0, 1, 2)
@@ -20,7 +20,10 @@ function App() {
 
   // Hack-style log generator
   const addLog = (msg: string) => {
-    setLogs(prev => [`> ${msg}`, ...prev].slice(0, 8));
+    // Zalgo text generator
+    const zalgoChars = ['̶', '̵', '̴', '̵', '̼', '̢', '͎', '͚', '͛', '͜', '͝', '͞', '͟', '͠', '͡', '͢', 'ͣ', 'ͤ', 'ͥ', 'ͦ', 'ͧ', 'ͨ', 'ͩ', 'ͪ', 'ͫ', 'ͬ', 'ͭ', 'ͮ', 'ͯ'];
+    const corruptedMsg = msg.split('').map(char => char + (Math.random() > 0.7 ? zalgoChars[Math.floor(Math.random() * zalgoChars.length)] : '')).join('');
+    setLogs(prev => [`> ${corruptedMsg}`, ...prev].slice(0, 8));
   };
 
   const handleSearch = async (e: React.FormEvent) => {
@@ -98,7 +101,7 @@ function App() {
   };
 
   return (
-    <div className="relative w-full h-full bg-black text-cyan-400 font-mono overflow-hidden">
+    <div className={`relative w-full h-full bg-black text-cyan-400 font-mono overflow-hidden ${memoryLevel === 2 ? 'chaos-mode' : ''} ${isGlitching && memoryLevel === 2 ? 'chaos-flash' : ''}`}>
       {/* 3D Scene Background */}
       <div className="absolute inset-0 z-0">
         <Canvas camera={{ position: [0, 0, 8], fov: 60 }}>
@@ -217,6 +220,35 @@ function App() {
           from { opacity: 0; transform: translateY(10px); }
           to { opacity: 1; transform: translateY(0); }
         }
+        /* CHAOS ANIMATIONS */
+        @keyframes glitch-anim {
+          0% { transform: translate(0) }
+          20% { transform: translate(-2px, 2px) }
+          40% { transform: translate(-2px, -2px) }
+          60% { transform: translate(2px, 2px) }
+          80% { transform: translate(2px, -2px) }
+          100% { transform: translate(0) }
+        }
+        @keyframes rgb-shift {
+          0% { text-shadow: 2px 0 red, -2px 0 blue; }
+          50% { text-shadow: -2px 0 red, 2px 0 blue; }
+          100% { text-shadow: 2px 0 red, -2px 0 blue; }
+        }
+        @keyframes bg-flash {
+            0% { filter: invert(0); }
+            10% { filter: invert(1); }
+            20% { filter: invert(0); }
+            100% { filter: invert(0); }
+        }
+        
+        /* Apply chaos when Level 3 */
+        .chaos-mode {
+            animation: glitch-anim 0.2s infinite, rgb-shift 0.1s infinite;
+        }
+        .chaos-flash {
+            animation: bg-flash 0.5s;
+        }
+
         .animate-fadeIn {
           animation: fadeIn 0.5s ease-out forwards;
         }
